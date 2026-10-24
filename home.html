@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Home - {{ app_name }}{% endblock %}
+{% block page_id %}home{% endblock %}
+
+{# HOME replaces the whole default layout: a top bar plus a welcome card. #}
+{% block body %}
+<header class="topbar">
+  <div class="topbar-inner">
+    {% include "_brand.html" %}
+
+    {# Logging out changes data, so it is a POST form (with the CSRF token), not a plain link. #}
+    <form method="post" action="{{ url_for('logout') }}" data-loading-text="Logging you out…">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-secondary btn-small">Log out</button>
+    </form>
+  </div>
+</header>
+
+<main class="home">
+  {% include "_messages.html" %}
+
+  <section class="card profile">
+    <div class="avatar" aria-hidden="true">{{ user.name[0]|upper }}</div>
+    <h1 class="profile-name">Welcome, {{ user.name }}</h1>
+    <p class="profile-username">@{{ user.username }}</p>
+    <p class="profile-note">You are logged in.</p>
+  </section>
+</main>
+{% endblock %}

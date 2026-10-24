@@ -1,0 +1,219 @@
+# Lauwak: login and account creation (Flask + SQLite)
+
+A small, complete login system you can run on your own computer. It follows your flowchart: loading screen, registration, login, forgot password, home page and logout.
+
+- **Backend:** Python + Flask (Flask's built-in development server)
+- **Database:** SQLite, a single file called `database.db` that the app creates for you
+- **Frontend:** plain HTML, CSS and JavaScript (no React, no Node.js, no npm)
+- **Accounts store only:** name, username, and a hashed password
+- **Branding:** the website name, **Lauwak**, with the tagline "Your study sidekick & flashcard generator" directly underneath, appears on every page. Both are written once (`APP_NAME` and `APP_TAGLINE` at the top of `app.py`) and shown through `templates/_brand.html`.
+
+---
+
+## 1. Project structure
+
+This project runs directly from the project root, not from a nested `login_project/` folder.
+
+```
+Project root/
+  app.py                  the whole backend (routes, database, security)
+  Readme                  this file
+  database.db             created automatically the first time you run the app
+  .venv/                  optional local virtual environment (current default in this project)
+  venv/                   older/alternate local virtual environment
+  templates/
+    base.html             shared page layout and loading screen
+    _messages.html        shared success / error / info boxes
+    _brand.html           the logo, name and tagline shown on every page
+    loading.html          start-up loading screen (flowchart: start -> loading)
+    login.html
+    register.html
+    forgot_password.html  request a new password (step 1: enter username)
+    reset_password.html   new password (step 2: choose and confirm it)
+    home.html
+  static/
+    css/style.css         all styling; every colour is in one block at the top
+    js/script.js          show/hide password, instant checks, loading states
+```
+
+---
+
+## 2. Run it on Windows (step by step)
+
+You need **Python 3.9 or newer**. Open Command Prompt in the project folder. The commands below use the virtual environment's Python directly, so you do not need to activate it.
+
+**Step 1. Extract the project.** If you downloaded a `.zip` file, right-click it and choose **Extract All...**. Do not run the app from inside the zip. Open a terminal in the folder containing `app.py`.
+
+**Step 2. Create a virtual environment** (skip this if `.venv` already exists). In a standard Windows Python installation, run:
+
+```
+py -m venv .venv
+```
+
+**Step 3. Install Flask.** This project does not currently include a `requirements.txt`, so install Flask directly. In this repo, the existing virtual environments use a `bin` folder instead of `Scripts`, so use the matching interpreter path below.
+
+Current project setup:
+```
+.venv\bin\python.exe -m pip install Flask
+```
+
+If your project uses `venv` instead of `.venv`, use:
+```
+venv\bin\python.exe -m pip install Flask
+```
+
+**Step 4. Start the app.** Use the command matching the environment you created.
+
+```
+.venv\bin\python.exe app.py
+```
+
+or:
+```
+venv\bin\python.exe app.py
+```
+
+The app is configured to listen on `127.0.0.1:5000` by default, as set in `app.py` (`HOST = "127.0.0.1"`, `PORT = 5000`). The terminal should print `Running on http://127.0.0.1:5000`. The first time, the app also creates `database.db` next to `app.py`. You do not need to create it by hand.
+
+**Step 5. Open the app.** In your browser go to:
+
+**http://127.0.0.1:5000**
+
+**To stop the app:** click the terminal window and press **Ctrl + C**.
+
+**Next time:** open a terminal in the project folder and run the start command for your environment again.
+
+---
+
+## 3. How to test every feature
+
+Do these in order. Each one says what you should see.
+
+1. **Loading screen.** Open http://127.0.0.1:5000. You see a short "Loading..." screen with the Lauwak logo and tagline, then the Login page.
+2. **Create an account (errors first).** Click **Create new account**. Press **Create account** with everything empty: red messages appear under each box and nothing is sent. Then try a username with 2 letters, a password under 8 characters, and two passwords that do not match. Each one shows its own message.
+3. **Create an account (success).** Name `Maria Santos`, username `maria`, password `password123` (twice). You return to Login with a green "Account created" message and your username already filled in.
+4. **Username must be unique.** Create another account with username `maria` (or `MARIA`). You get "That username is already taken." Using the same *name* with a different username works, because names do not have to be unique.
+5. **Incorrect password.** On Login, enter `maria` and a wrong password. You see "That username and password don't match. Check them and try again." and can try again straight away.
+6. **Successful login.** Enter the right password. A quick "Signing you in..." screen appears, then **Home** shows "Welcome, Maria Santos", `@maria` and a **Log out** button.
+7. **Home is protected.** Click **Log out**, then type `http://127.0.0.1:5000/home` in the address bar. You are sent to Login with "Log in to continue."
+8. **Logout and the Back button.** Log in again, click **Log out** (you land on Login with a green message), then press your browser's Back button. Home does not appear.
+9. **Forgot password.** On Login click **Forgot password?**, enter `maria`, click **Continue**, then choose and confirm a new password. You return to Login. The old password is now rejected and the new one works.
+10. **Show / Hide.** On any password box, click **Show** to see what you typed and **Hide** to cover it again.
+11. **See the saved data (optional).** Install the free "DB Browser for SQLite", open `database.db` and look at the `users` table. The `password_hash` column holds a long scrambled value, never the real password.
+
+**Start completely fresh:** stop the app (Ctrl + C), delete `database.db`, and start it again.
+
+---
+
+## 4. How your flowchart maps to the app
+
+| Flowchart box | What happens in the app | Where |
+|---|---|---|
+| start, loading | "Loading..." screen. The server checks the session, then you move on to Home (already logged in) or Login | `/` , `loading.html` |
+| registered? | Login page for returning users, with a **Create new account** button for new users | `/login` |
+| new user, registration, user db | Name, username, password, confirm password. Checked, then saved in SQLite with a hashed password | `/register` |
+| login | Username and password | `/login` |
+| forget pass? (yes), request new password, new password | **Forgot password?** link, then username, then new password + confirmation. The new hash is saved in the user db | `/forgot-password`, `/reset-password` |
+| forget pass? (no), correct pass? | The password is checked against the database. Wrong: back to Login with a friendly message. Right: a new session is created | `/login` |
+| loading, Home | "Signing you in..." screen, then Home with your name, username and Log out | `/home` |
+| logout | Clears the session and returns to Login. Home is blocked for anyone not logged in | `/logout` |
+
+---
+
+## 5. Password reset: read this first
+
+This app deliberately collects **no email address and no phone number**, so it has **no way to prove who is asking** for a new password. The reset flow is therefore a simple **local demonstration**: type a username, choose a new password. That means **anyone who knows a username can change that account's password.**
+
+That is fine for testing on your own computer. It is **not secure**, and it must **not** be used on a public website. A real site would verify identity first (for example with a link emailed to the account owner). The same warning is shown on both password-reset pages.
+
+---
+
+## 6. Security notes
+
+What is protected:
+
+- **Passwords are never stored.** Only a salted PBKDF2-SHA256 hash (made by Werkzeug) is saved, and logins are checked with Werkzeug's `check_password_hash`.
+- **Every database query uses `?` placeholders**, so typed text can never become SQL.
+- **Usernames are cleaned in one place** (`normalize_username`): spaces are trimmed and letters are lower-cased, so `Maria` and `maria` are the same account everywhere. Usernames are also unique at the database level.
+- **Login state lives in a signed Flask session cookie** (HttpOnly, SameSite=Lax). A new session is started at login, and Home re-checks the database on every visit.
+- **Forms carry a secret token (CSRF protection)**, and logging out is a button that sends a form, not a plain link.
+- **Pages are sent with `Cache-Control: no-store`** so the Back button cannot show Home after logout, plus a Content-Security-Policy and other protective headers.
+- **Login errors are deliberately vague** ("username and password don't match") so they do not reveal which usernames exist.
+
+Development-only defaults you should know about:
+
+- **`SECRET_KEY`.** `app.py` uses a built-in placeholder key unless you set your own. It is fine on your own computer. Before showing the app to anyone else, set your own long random text. In Command Prompt, in the same window where you run the app:
+  ```
+  set SECRET_KEY=type-a-long-random-sentence-here
+  python app.py
+  ```
+  (PowerShell: `$env:SECRET_KEY="type-a-long-random-sentence-here"`.) Changing the key logs everybody out.
+- **Debug mode is on** (`debug=True` at the bottom of `app.py`). It gives helpful error pages and restarts the app when you edit a file. Turn it off for anything public.
+- **The server only listens on `127.0.0.1`**, so only your own computer can open the site. It uses plain HTTP; the cookie is not marked `Secure` because that requires HTTPS.
+
+---
+
+## 7. Colours
+
+The app uses a red brand color similar to the reference image. Open `static/css/style.css`: the `:root { ... }` block at the top holds the colour palette. The original stylesheet at the project root is `style.css`; keep its palette values in sync with `static/css/style.css`, which is the stylesheet Flask serves.
+
+- **Part A, your palette:** your 17 colours, exactly as you gave them. Change a value here to recolour the app.
+- **Part B, where each colour is used:** short names such as `--color-link` that point at your palette colours. The rest of the stylesheet uses only these. You normally never need to edit Part B. The brand has its own two names, `--color-brand-name` and `--color-brand-tagline`, in case you ever want the website name or tagline in a different colour from normal text.
+
+| Your colour | Where it appears |
+|---|---|
+| `--bg` | page background, information message box |
+| `--surface` | cards, top bar, text boxes, and the white writing on red buttons |
+| `--surface-hover` | hover fill of the Show / Hide button |
+| `--text` | main text, the website name, message text, text box edge while hovered |
+| `--text-secondary` | subtitles, helper text, the tagline under the website name, text box edges, the "or" divider |
+| `--primary` | red primary buttons, links, avatar, spinner, focus outline |
+| `--primary-hover` | hovered or pressed buttons, hovered links |
+| `--primary-light` | hover fill of outlined buttons, background of error messages |
+| `--primary-cube` | red logo square |
+| `--primary2` | text selection highlight |
+| `--gray` | card edges, dividers, spinner track, information message edge |
+| `--success`, `--success-light` | success message edge and background |
+| `--warning`, `--warning-light` | edge and background of the "Local demo only" notice |
+| `--danger` | red outline on text boxes with a problem, error message edge |
+| `--flash` | error message writing |
+
+Four values are your colours with transparency added, because CSS cannot make a variable see-through: the card shadow (`--text` at 14%), the focus glow (`--primary` at 25%), the glow on a text box with a problem (`--danger` at 25%), and the loading screen background (`--bg` at 94%). Each sits in Part B with a comment naming the colour it comes from. If you change one of those base colours, change the matching `rgba(...)` numbers too.
+
+Contrast note: `--danger` is only 3.8:1 against white, below the 4.5:1 needed for small text, so it is used for outlines only and error messages are written in `--flash`. Success, information and warning boxes use `--text` for their writing for the same reason.
+
+---
+
+## 8. Troubleshooting
+
+**`'py' is not recognized`.** Install Python from python.org and tick "Add python.exe to PATH", then reopen Command Prompt. If `python` is available, you can create the environment with `python -m venv .venv`.
+
+**The virtual environment has `bin` instead of `Scripts`.** This can happen when Python comes from MSYS or another Unix-style distribution. Run `.venv\bin\python.exe -m pip install Flask` and `.venv\bin\python.exe app.py`; do not use the `Scripts` commands for that environment. You can run the interpreter directly without activating the environment.
+
+**`ModuleNotFoundError: No module named 'flask'`.** Install Flask into the same environment used to run the app: `.venv\Scripts\python.exe -m pip install Flask` for a standard Windows environment, or `.venv\bin\python.exe -m pip install Flask` for an environment with `bin`.
+
+**`jinja2.exceptions.TemplateNotFound`.** Check that the HTML pages are inside the project's `templates` folder, and that shared templates such as `_messages.html` and `_brand.html` are there too. Flask looks for templates in this folder by default.
+
+**"Address already in use" / "Only one usage of each socket address".** Another copy of the app is still running. Close other terminal windows or press Ctrl + C in them. Or open `app.py`, change `PORT = 5000` to `PORT = 5001`, and use `http://127.0.0.1:5001`.
+
+**`unable to open database file`.** The project is still inside the zip, or in a read-only folder. Extract it fully and move it somewhere you can write, such as Documents.
+
+**The page looks unstyled, or old colours show.** Confirm that the CSS and JavaScript are in `static\css\style.css` and `static\js\script.js`, then press **Ctrl + F5** to reload without the browser's saved copy.
+
+**"That form expired. Reload the page and try again."** The page was open for a long time, cookies were cleared or blocked, or `SECRET_KEY` changed. Reload the page and submit again.
+
+**I was logged out after switching between `localhost` and `127.0.0.1`.** Browsers keep cookies separately for each address. Use `http://127.0.0.1:5000` consistently.
+
+**"This site can't be reached".** The app is not running. Look at the terminal for errors, and make sure you typed `http://` (not `https://`).
+
+**I want to start over.** Stop the app (Ctrl + C), delete `database.db`, and start the app again.
+
+---
+
+## 9. Limitations (honest list)
+
+- The password reset has **no identity check** (see section 5). It is for local testing only.
+- There is **no rate limiting or account lockout**, so nothing slows down someone guessing passwords.
+- Sessions are stored in the browser's cookie, so **changing a password does not log out other browsers** that are already logged in.
+- Flask's development server and SQLite file are great for learning, but are **not a public production setup**.
+- Only the features in the flowchart exist: no profile editing, account deletion, email, feeds or messaging.

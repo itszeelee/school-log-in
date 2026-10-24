@@ -1,0 +1,11 @@
+{#
+  The Lauwak lockup: logo square and website name on one line, with the tagline
+  directly underneath. Every page includes this file, so the name and tagline are
+  written once (APP_NAME and APP_TAGLINE at the top of app.py). The size on each
+  page is set in style.css.
+#}
+<div class="brand">
+  <span class="brand-mark" aria-hidden="true">{{ app_name[0] }}</span>
+  <span class="brand-name">{{ app_name }}</span>
+  <p class="brand-tagline">{{ app_tagline }}</p>
+</div>

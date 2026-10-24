@@ -1,0 +1,744 @@
+/* ==========================================================================
+   Lauwak - stylesheet
+
+   1. Design tokens (:root)   <- EVERY colour lives here: first your palette,
+                                 then where each palette colour is used.
+   2. Base
+   3. Brand (logo, name and tagline)
+   4. Page layouts
+   5. Cards, messages and notice
+   6. Forms and buttons
+   7. Home page
+   8. Loading screens
+   9. Small screens and accessibility
+   ========================================================================== */
+
+
+/* 1. DESIGN TOKENS ------------------------------------------------------- */
+:root {
+  /* ======================================================================
+     A. YOUR PALETTE
+        These 17 values are your colours. Change a value here and every place
+        that uses that colour (listed in part B) changes with it.
+     ====================================================================== */
+  --bg: #f9f7f2;
+  --surface: #ffffff;
+  --surface-hover: #fcfaf7;
+  --text: #2d2420;
+  --primary-cube: #b23a2b;
+  --text-secondary: #7c6f64;
+  --primary: #3000dc;
+  --gray: rgba(186, 186, 186, 0.57);
+  --primary-hover: #8b2d22;
+  --primary-light: #fbebe6;
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --primary2: #ecec1847;
+  --danger: #ef4444;
+  --flash: #b23a2b;
+
+  /* ======================================================================
+     B. WHERE EACH COLOUR IS USED
+        The rest of this file only uses the --color-... names below, never the
+        palette names directly. You normally do not need to edit this part.
+     ====================================================================== */
+
+  /* Page and surfaces */
+  --color-bg: var(--bg);                         /* page background */
+  --color-surface: var(--surface);               /* cards, top bar, text boxes */
+  --color-surface-hover: var(--surface-hover);   /* hover fill of the Show / Hide button */
+
+  /* Text and links */
+  --color-text: var(--text);
+  --color-text-muted: var(--text-secondary);     /* subtitles and helper text */
+  --color-link: var(--primary);
+  --color-link-hover: var(--primary-hover);
+
+  /* Lines and shadow */
+  --color-border: var(--gray);                   /* card edges, dividers, spinner track */
+  --color-input-border: var(--text-secondary);   /* text boxes and outlined buttons (kept dark enough to see) */
+  --color-border-strong: var(--text);            /* text box edge while the mouse is over it */
+  --color-shadow: rgba(45, 36, 32, 0.14);        /* --text at 14% (derived: update if --text changes) */
+
+  /* Brand: logo square (the "cube"), website name and tagline */
+  --color-logo: var(--primary-cube);
+  --color-brand-name: var(--text);
+  --color-brand-tagline: var(--text-secondary);
+
+  /* Main action: primary buttons, avatar, spinner */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-hover);  /* pressed button */
+  --color-on-primary: var(--surface);            /* writing on top of the primary and logo colours */
+
+  /* Keyboard focus outline and glow */
+  --color-focus: var(--primary);
+  --color-focus-ring: rgba(178, 58, 43, 0.25);   /* --primary at 25% (derived: update if --primary changes) */
+
+  /* Outlined buttons while hovered or pressed */
+  --color-secondary-hover: var(--primary-light);
+
+  /* Text selection highlight (see-through, so the text stays readable) */
+  --color-selection: var(--primary2);
+
+  /* Error messages and text boxes with a problem.
+     Error WRITING uses --flash because --danger is too light for small text
+     (3.8:1 on white). --danger is used for outlines only. */
+  --color-danger-text: var(--flash);
+  --color-danger-bg: var(--primary-light);
+  --color-danger-border: var(--danger);
+  --color-danger-ring: rgba(239, 68, 68, 0.25);  /* --danger at 25% (derived: update if --danger changes) */
+
+  /* Success messages */
+  --color-success-text: var(--text);
+  --color-success-bg: var(--success-light);
+  --color-success-border: var(--success);
+
+  /* Information messages */
+  --color-info-text: var(--text);
+  --color-info-bg: var(--bg);
+  --color-info-border: var(--gray);
+
+  /* "Local demo only" security notice */
+  --color-warning-text: var(--text);
+  --color-warning-bg: var(--warning-light);
+  --color-warning-border: var(--warning);
+
+  /* Loading screen background */
+  --color-overlay: rgba(249, 247, 242, 0.94);    /* --bg at 94% (derived: update if --bg changes) */
+
+  /* ----- Not colours: fonts and corner radii ----- */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-card: 14px;
+  --radius-control: 10px;
+}
+
+
+/* 2. BASE ---------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-link);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-selection);
+}
+
+/* Makes the HTML "hidden" attribute win over display rules such as display: flex. */
+[hidden] {
+  display: none !important;
+}
+
+
+/* 3. BRAND (logo, name and tagline) ------------------------------------- */
+/* One lockup, used on every page through templates/_brand.html: the logo square
+   and the name on one line, with the tagline directly underneath. Each place sets
+   its own size with three variables: --mark, --name-size and --tagline-size. */
+.brand {
+  --mark: 44px;
+  --name-size: 1.875rem;
+  --tagline-size: 0.9375rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px; /* space under the name, and between the logo square and the name */
+  max-width: 100%;
+  text-align: center;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--mark);
+  height: var(--mark);
+  border-radius: calc(var(--mark) * 0.3);
+  background: var(--color-logo);
+  color: var(--color-on-primary);
+  font-size: calc(var(--mark) * 0.55);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.brand-name {
+  color: var(--color-brand-name);
+  font-size: var(--name-size);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* flex-basis 100% puts the tagline on its own line, directly under the name. */
+.brand-tagline {
+  flex-basis: 100%;
+  color: var(--color-brand-tagline);
+  font-size: var(--tagline-size);
+  line-height: 1.4;
+  text-wrap: balance; /* spreads the words evenly if the tagline needs two lines */
+}
+
+
+/* 4. PAGE LAYOUTS -------------------------------------------------------- */
+/* Login, Register, Forgot password, Reset password: a centered card. */
+.auth {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px 16px;
+}
+
+.auth-intro {
+  text-align: center;
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Wide screens: the Login page puts the big logo on the left and the card on the right. */
+@media (min-width: 960px) {
+  .auth--split {
+    flex-direction: row;
+    gap: 80px;
+  }
+
+  .auth--split .auth-intro {
+    flex: 1 1 0;
+    max-width: 440px;
+    text-align: left;
+  }
+
+  .auth--split .auth-panel {
+    flex: 0 0 420px;
+  }
+
+  /* Big logo, name and tagline, lined up on the left edge. */
+  .auth--split .brand {
+    --mark: 64px;
+    --name-size: 3rem;
+    --tagline-size: 1.25rem;
+    justify-content: flex-start;
+    gap: 14px 16px;
+    text-align: left;
+  }
+}
+
+
+/* 5. CARDS, MESSAGES AND NOTICE ------------------------------------------ */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 28px 28px 24px;
+  box-shadow: 0 12px 32px -16px var(--color-shadow);
+}
+
+/* The small box under the Register card ("Already have an account?"). */
+.card--plain {
+  padding: 16px 20px;
+  box-shadow: none;
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.card-title {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.card-lead {
+  margin-bottom: 20px;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  text-wrap: balance;
+}
+
+.card-title + .card-lead {
+  margin-top: -14px;
+}
+
+.username-tag {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.alert {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.alert-error {
+  color: var(--color-danger-text);
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+}
+
+.alert-success {
+  color: var(--color-success-text);
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+}
+
+.alert-info {
+  color: var(--color-info-text);
+  background: var(--color-info-bg);
+  border-color: var(--color-info-border);
+}
+
+/* The thick left edge marks this as a warning, not a normal message. */
+.notice {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-warning-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-control);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.notice strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+
+/* 6. FORMS AND BUTTONS --------------------------------------------------- */
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.field input {
+  display: block;
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit; /* 16px text also stops iPhones from zooming in on focus */
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input:hover {
+  border-color: var(--color-border-strong);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.field input.is-invalid {
+  border-color: var(--color-danger-border);
+}
+
+.field input.is-invalid:focus {
+  box-shadow: 0 0 0 3px var(--color-danger-ring);
+}
+
+.hint {
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.field-error {
+  margin-top: 6px;
+  color: var(--color-danger-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* No error text = no space used. */
+.field-error:empty {
+  display: none;
+}
+
+/* Password box with the Show / Hide button inside it. */
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-right: 76px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  min-width: 56px;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle-password:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.btn-primary:active {
+  background: var(--color-primary-active);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  border-color: var(--color-input-border);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background: var(--color-secondary-hover);
+  border-color: var(--color-primary);
+  color: var(--color-text); /* keeps the writing dark when the button is a link */
+}
+
+.btn-secondary:active {
+  background: var(--color-secondary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.btn-small {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 0.9375rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-links {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+
+/* 7. HOME PAGE ----------------------------------------------------------- */
+.topbar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 10px 16px;
+}
+
+/* The Log out button always keeps its full size; on small screens the tagline
+   next to the logo wraps onto two lines instead. */
+.topbar-inner > form {
+  flex: none;
+}
+
+/* In the top bar the logo square sits on the left, with the name and the
+   tagline stacked on its right. */
+.topbar .brand {
+  --mark: 38px;
+  --name-size: 1.25rem;
+  --tagline-size: 0.8125rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: start;
+  gap: 2px 12px;
+  min-width: 0;
+  text-align: left;
+}
+
+.topbar .brand-mark {
+  grid-row: 1 / span 2;
+}
+
+.topbar .brand-name {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+.topbar .brand-tagline {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+}
+
+.home {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.profile {
+  padding: 40px 24px 36px;
+  text-align: center;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.profile-name {
+  font-size: 1.75rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.profile-username {
+  margin-top: 2px;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.profile-note {
+  margin-top: 20px;
+}
+
+
+/* 8. LOADING SCREENS ----------------------------------------------------- */
+/* Start-up screen shown at "/" before moving on to Login or Home. */
+.splash {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+}
+
+.splash .brand {
+  --mark: 64px;
+  --name-size: clamp(2.25rem, 9vw, 3rem);
+  --tagline-size: clamp(1rem, 4.2vw, 1.25rem);
+  gap: 10px 14px;
+}
+
+.splash-text {
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+/* Full-screen loading state shown while a form is being sent. */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--color-overlay);
+}
+
+.loading-text {
+  font-weight: 600;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* 9. SMALL SCREENS AND ACCESSIBILITY ------------------------------------- */
+@media (max-width: 480px) {
+  .auth {
+    padding: 20px 12px;
+  }
+
+  .card {
+    padding: 22px 18px 20px;
+  }
+
+  .profile {
+    padding: 32px 18px;
+  }
+
+  /* Top bar on phones: a slightly smaller logo and button leave room for the tagline. */
+  .topbar-inner {
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  .topbar .brand {
+    --mark: 34px;
+    --tagline-size: 0.75rem;
+    column-gap: 10px;
+  }
+
+  .topbar .btn-small {
+    padding: 0 12px;
+  }
+}
+
+/* People who ask their device for less motion get a much slower spinner. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+
+  .field input,
+  .btn {
+    transition: none;
+  }
+}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Loading - {{ app_name }}{% endblock %}
+{% block page_id %}start{% endblock %}
+
+{# Without JavaScript, this tag still moves the visitor on to the next page. #}
+{% block head_extra %}
+<noscript><meta http-equiv="refresh" content="0; url={{ next_url }}"></noscript>
+{% endblock %}
+
+{# START -> LOADING: script.js reads data-next-url and moves on after a short moment. #}
+{% block body %}
+<main class="splash" data-next-url="{{ next_url }}">
+  {% include "_brand.html" %}
+  <div class="spinner" aria-hidden="true"></div>
+  <p class="splash-text" role="status">Loading…</p>
+</main>
+{% endblock %}

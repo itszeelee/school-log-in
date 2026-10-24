@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body data-page="{% block page_id %}{% endblock %}">
+
+  {# Loading screen. It stays hidden until script.js shows it while a form is being sent. #}
+  <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" hidden>
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="loading-text" class="loading-text">Loading…</p>
+  </div>
+
+  {#
+    DEFAULT LAYOUT = a centered card (used by Login, Register, Forgot password and
+    Reset password). Those pages only fill in the "card" block (and sometimes
+    "below_card"). Home and Loading replace the whole "body" block.
+  #}
+  {% block body %}
+  <main class="auth {% block auth_class %}{% endblock %}">
+    <div class="auth-intro">
+      {% include "_brand.html" %}
+    </div>
+
+    <div class="auth-panel">
+      <div class="card">
+        {% include "_messages.html" %}
+        {% block card %}{% endblock %}
+      </div>
+      {% block below_card %}{% endblock %}
+    </div>
+  </main>
+  {% endblock %}
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
